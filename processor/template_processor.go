@@ -34,6 +34,23 @@ func NewTemplateProcessor(processorConfig *config.ProcessorConfig) *TemplateProc
 	return processor
 }
 
+func collectTemplateFilenames(dir string) (filenames []string) {
+	files, err := templateResources.ReadDir(dir)
+	util.PanicIfError(err)
+
+	for _, file := range files {
+		curDir := path.Join(dir, file.Name())
+
+		if file.IsDir() {
+			filenames = append(filenames, collectTemplateFilenames(curDir)...)
+		} else {
+			filenames = append(filenames, curDir)
+		}
+	}
+
+	return
+}
+
 func (processor *TemplateProcessor) initTemplates() {
 	fileContentTemplate := template.New("file_content")
 	filenameTemplate := template.New("filename")
@@ -50,22 +67,7 @@ func (processor *TemplateProcessor) initTemplates() {
 	processor.fileContentTemplate = fileContentTemplate
 }
 
-func collectTemplateFilenames(dir string) (filenames []string) {
-	files, err := templateResources.ReadDir(dir)
-	util.PanicIfError(err)
-
-	for _, file := range files {
-		if file.IsDir() {
-			filenames = append(filenames, collectTemplateFilenames(path.Join(dir, file.Name()))...)
-		} else {
-			filenames = append(filenames, path.Join(dir, file.Name()))
-		}
-	}
-
-	return
-}
-
-func (processor *TemplateProcessor) processFile(filename string) {
+func (processor *TemplateProcessor) processFile(rootDir, filename string) {
 	templateFileContent, err := templateResources.ReadFile(filename)
 	util.PanicIfError(err)
 
@@ -77,16 +79,11 @@ func (processor *TemplateProcessor) processFile(filename string) {
 
 	// Process filename
 	filenameBuffer := bytes.NewBufferString("")
-	nameTpl.Execute(filenameBuffer, config.ProcessorConfig{
-		TypeName:       strcase.ToSnake(processor.config.TypeName),
-		EntityName:     strcase.ToSnake(processor.config.EntityName),
-		RepositoryName: strcase.ToSnake(processor.config.RepositoryName),
-		UseCaseName:    strcase.ToSnake(processor.config.UseCaseName),
-	})
+	nameTpl.Execute(filenameBuffer, processor.config.ToSnakeValues())
 
 	targetFilename := strings.Replace(
 		filenameBuffer.String(),
-		templateRootDirname,
+		rootDir,
 		path.Join(processor.config.TargetPath, strcase.ToSnake(processor.config.TypeName)),
 		1,
 	)
@@ -105,10 +102,15 @@ func (processor *TemplateProcessor) processFile(filename string) {
 	util.PanicIfError(contentTpl.Execute(file, processor.config))
 }
 
-func (processor *TemplateProcessor) Process() {
-	filenames := collectTemplateFilenames(templateRootDirname)
+func (processor *TemplateProcessor) processFiles(suffixDir string) {
+	rootDir := path.Join(templateRootDirname, suffixDir)
+	filenames := collectTemplateFilenames(rootDir)
 
 	for _, filename := range filenames {
-		processor.processFile(filename)
+		processor.processFile(rootDir, filename)
 	}
+}
+
+func (processor *TemplateProcessor) ProcessByType() {
+	processor.processFiles("type")
 }

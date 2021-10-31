@@ -2,11 +2,10 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"path"
 
 	"github.com/aeroxmotion/gexarch/util"
-	"golang.org/x/mod/modfile"
+	"github.com/iancoleman/strcase"
 )
 
 type ProcessorConfig struct {
@@ -19,22 +18,26 @@ type ProcessorConfig struct {
 }
 
 func GetProcessorConfigByType(Type string) *ProcessorConfig {
-	modFileBytes, err := os.ReadFile("go.mod")
-	util.PanicIfError(err)
-
-	parsedModFile, err := modfile.Parse("go.mod", modFileBytes, func(_, version string) (string, error) {
-		return version, nil
-	})
-	util.PanicIfError(err)
-
+	modFile := util.ParseModfile()
 	cliConfig := GetCliConfig()
 
 	return &ProcessorConfig{
 		CliConfig:      cliConfig,
-		ModulePath:     path.Join(parsedModFile.Module.Mod.Path, cliConfig.TargetPath),
+		ModulePath:     path.Join(modFile.Module.Mod.Path, cliConfig.TargetPath),
 		TypeName:       Type,
 		UseCaseName:    fmt.Sprintf("%sFinder", Type),
 		RepositoryName: fmt.Sprintf("%sRepository", Type),
 		EntityName:     Type,
+	}
+}
+
+func (config *ProcessorConfig) ToSnakeValues() *ProcessorConfig {
+	return &ProcessorConfig{
+		CliConfig:      config.CliConfig,
+		ModulePath:     config.ModulePath,
+		TypeName:       strcase.ToSnake(config.TypeName),
+		EntityName:     strcase.ToSnake(config.EntityName),
+		RepositoryName: strcase.ToSnake(config.RepositoryName),
+		UseCaseName:    strcase.ToSnake(config.UseCaseName),
 	}
 }
