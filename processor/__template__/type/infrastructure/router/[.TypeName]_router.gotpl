@@ -7,12 +7,12 @@ import (
 )
 
 type {{.TypeName}}Router struct {
-    *{{.TypeName}}Handler
+    *handler.{{.TypeName}}Handler
 }
 
 func New{{.TypeName}}Router() *{{.TypeName}}Router {
     return &{{.TypeName}}Router{
-        handler.New{{.TypeName}}Handler,
+        handler.New{{.TypeName}}Handler(),
     }
 }
 
