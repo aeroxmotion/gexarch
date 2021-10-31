@@ -1,0 +1,19 @@
+package application
+
+import (
+	"{{.ModulePath}}/{{.TypeName | to_snake }}/domain"
+)
+
+type {{.UseCaseName}} struct {
+	Repo domain.{{.RepositoryName}}
+}
+
+func New{{.UseCaseName}}(repo domain.{{.RepositoryName}}) *{{.UseCaseName}} {
+	return &{{.UseCaseName}}{
+		Repo: repo,
+	}
+}
+
+func (usecase *{{.UseCaseName}}) Find{{.TypeName}}(id uint64) (*domain.{{.TypeName}}, error) {
+	return usecase.Repo.Get{{.TypeName}}(id)
+}

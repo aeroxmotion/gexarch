@@ -1,0 +1,12 @@
+package repository
+
+import (
+    "{{.ModulePath}}/{{.TypeName | to_snake}}/domain"
+)
+
+func (repo *{{.TypeName}}RestclientRepository) Get{{.TypeName}}(id uint64) (*domain.{{.TypeName}}, error) {
+    return &domain.{{.TypeName}}{
+        ID: id,
+        Name: "test",
+    }, nil
+}

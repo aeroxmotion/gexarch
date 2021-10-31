@@ -1,0 +1,22 @@
+package router
+
+import (
+    "net/http"
+
+    "{{.ModulePath}}/{{.TypeName | to_snake}}/infrastructure/handler"
+)
+
+type {{.TypeName}}Router struct {
+    *{{.TypeName}}Handler
+}
+
+func New{{.TypeName}}Router() *{{.TypeName}}Router {
+    return &{{.TypeName}}Router{
+        handler.New{{.TypeName}}Handler,
+    }
+}
+
+// Placeholder router method
+func (router *{{.TypeName}}Router) Empty(writer http.ResponseWriter, request *http.Request) error {
+    return nil
+}

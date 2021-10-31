@@ -1,0 +1,22 @@
+package handler
+
+import (
+	"{{.ModulePath}}/{{.TypeName | to_snake}}/application"
+	"{{.ModulePath}}/{{.TypeName | to_snake}}/infrastructure/repository"
+)
+
+type {{.TypeName}}Handler struct {
+	{{.UseCaseName}} *application.{{.UseCaseName}}
+}
+
+func New{{.TypeName}}Handler() *{{.TypeName}}Handler {
+	// Repository
+	repo := repository.New{{.TypeName}}RestclientRepository()
+
+	// Use-cases
+	{{.UseCaseName}} := application.New{{.UseCaseName}}(repo)
+
+	return &{{.TypeName}}Handler{
+		{{.UseCaseName}}: {{.UseCaseName}},
+	}
+}

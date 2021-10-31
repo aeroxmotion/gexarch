@@ -1,0 +1,12 @@
+package repository
+
+import (
+    "{{.ModulePath}}/{{.TypeName | to_snake}}/domain"
+)
+
+type {{.TypeName}}RestclientRepository struct {
+}
+
+func New{{.TypeName}}RestclientRepository() domain.{{.RepositoryName}} {
+    return &{{.TypeName}}RestclientRepository{}
+}
